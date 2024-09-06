@@ -14,18 +14,10 @@ def get_file_info(url):
         # Check if the request was successful
         if response.status_code == 200:
             # Extract relevant information from the headers
-            content_type = response.headers.get('Content-Type', 'Unknown')
             content_length = response.headers.get('Content-Length', 'Unknown')
-            last_modified = response.headers.get('Last-Modified', 'Unknown')
             etag = response.headers.get('ETag', 'Unknown')
             content_disposition = response.headers.get('Content-Disposition', 'Unknown')
-            cache_control = response.headers.get('Cache-Control', 'Unknown')
-            expires = response.headers.get('Expires', 'Unknown')
             final_url = response.url
-
-            # Infer the file extension from the content type if possible
-            extension = mimetypes.guess_extension(content_type.split(';')[0].strip())
-            extension = extension if extension else 'Unknown'
 
             # Extract filename from Content-Disposition header if available
             filename = 'Unknown'
@@ -39,30 +31,12 @@ def get_file_info(url):
                 filename = parsed_url.path.split('/')[-1]
                 filename = unquote(filename)  # Decode URL-encoded filename
 
-            # Print file metadata (optional)
-            print(f"File URL: {final_url}")
-            print(f"Filename: {filename}")
-            # print(f"Content Type: {content_type}")
-            print(f"Content Length: {content_length} bytes")
-            # print(f"File Extension: {extension}")
-            # print(f"Last Modified: {last_modified}")
-            print(f"ETag: {etag}")
-            # print(f"Content-Disposition: {content_disposition}")
-            # print(f"Cache-Control: {cache_control}")
-            # print(f"Expires: {expires}")
-
             # Return metadata as a dictionary
             return {
                 'url': final_url,
                 'filename': filename,
-                'content_type': content_type,
                 'content_length': content_length,
-                'extension': extension,
-                'last_modified': last_modified,
-                'etag': etag,
-                'content_disposition': content_disposition,
-                'cache_control': cache_control,
-                'expires': expires
+                'etag': etag
             }
 
         else:
@@ -71,6 +45,18 @@ def get_file_info(url):
 
     except requests.RequestException as e:
         print(f"An error occurred: {e}")
+        return None
+
+def get_user_id():
+    """
+    Reads the user ID from the user_id.txt file.
+    """
+    try:
+        with open("user_id.txt", "r") as f:
+            user_id = f.read().strip()  # Read and remove any extra whitespace
+        return user_id
+    except Exception as e:
+        print(f"Error reading user ID: {e}")
         return None
 
 def check_if_file_exists(collection, file_info):
@@ -100,25 +86,31 @@ if __name__ == "__main__":
 
     # Connect to MongoDB and check if file exists
     if file_info:
-        # Step 1: Create a MongoDB client
-        client = MongoClient(db_url)
+        # Step 1: Get the user ID
+        user_id = get_user_id()
+        if not user_id:
+            print("User ID is missing. Cannot proceed.")
+        else:
+            # Step 2: Create a MongoDB client
+            client = MongoClient(db_url)
 
-        try:
-            # Step 2: Connect to the database
-            db = client.get_database('DDAS')  # Replace 'test_database' with your desired database name
+            try:
+                # Step 3: Connect to the database
+                db = client.get_database('DDAS')
 
-            # Step 3: Define a collection
-            file_metadata_collection = db['FileMetadata']
+                # Step 4: Define a collection
+                file_metadata_collection = db['FileMetadata']
 
-            # Step 4: Check if file already exists
-            if not check_if_file_exists(file_metadata_collection, file_info):
-                # Step 5: Save the file information to the database if it does not exist
-                result = file_metadata_collection.insert_one(file_info)
-                print(f"Document saved with ID: {result.inserted_id}")
+                # Step 5: Check if file already exists
+                if not check_if_file_exists(file_metadata_collection, file_info):
+                    # Step 6: Add the user ID to the file info and save it to the database
+                    file_info['user_id'] = user_id
+                    result = file_metadata_collection.insert_one(file_info)
+                    print(f"Document saved with ID: {result.inserted_id}")
 
-        except Exception as e:
-            print(f"Error connecting to the DB or saving document: {e}")
+            except Exception as e:
+                print(f"Error connecting to the DB or saving document: {e}")
 
-        finally:
-            # Close the connection
-            client.close()
+            finally:
+                # Close the connection
+                client.close()
