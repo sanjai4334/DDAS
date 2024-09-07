@@ -1,5 +1,4 @@
 import socket
-import threading
 import os
 import uuid
 
@@ -40,10 +39,7 @@ def listen_for_user_id():
             sock.sendto(ip_address.encode(), addr)
             print(f"User ID match found! Sent IP address {ip_address}")
 
-# Start the server in a separate thread
-listener_thread = threading.Thread(target=listen_for_user_id)
-listener_thread.daemon = True
-listener_thread.start()
-
-# Keep the script running
-listener_thread.join()
+def start_server():
+    print("Starting UID server...")
+    # Start listening for user ID broadcasts
+    listen_for_user_id()

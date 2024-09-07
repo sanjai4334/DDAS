@@ -81,7 +81,3 @@ def start_server():
         if server_socket:
             server_socket.close()
             print("[*] Server socket closed.")
-
-# Start the server
-start_server()
-
