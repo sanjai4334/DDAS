@@ -63,10 +63,12 @@ def check_if_file_exists(collection, file_info):
     """
     Check if the file already exists in the collection.
     """
-    # Check for a document with the same URL or filename
+    # Check for a document with the same URL, filename, ETag, and content length
     existing_file = collection.find_one({
-        'url': file_info['url'],  # Check by URL
-        # You can add more fields to match, such as 'filename': file_info['filename']
+        'url': file_info['url'],            # Check by URL
+        'filename': file_info['filename'],  # Check by filename
+        'etag': file_info['etag'],          # Check by ETag
+        'content_length': file_info['content_length']  # Check by content length
     })
 
     if existing_file:
