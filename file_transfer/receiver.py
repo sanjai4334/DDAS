@@ -2,24 +2,20 @@ import socket
 import os
 
 # Define server address and port
-SERVER_HOST = input("Enter the server IP: ")  # Replace with the server's IP address
 SERVER_PORT = 5001
 BUFFER_SIZE = 4096  # Buffer size for receiving data
 SAVE_DIR = 'received_files'  # Directory to save the received files
 
-def receive_file():
+def receive_file(ip_addr, file_to_request):
     # Create a socket object
     client_socket = socket.socket()
 
     # Connect to the server
-    client_socket.connect((SERVER_HOST, SERVER_PORT))
-    print(f"[+] Connected to {SERVER_HOST}:{SERVER_PORT}")
-
-    # Request the filename from the user
-    filename_to_request = input("Enter the filename you want to receive (with extension): ")
+    client_socket.connect((ip_addr, SERVER_PORT))
+    print(f"[+] Connected to {ip_addr}:{SERVER_PORT}")
 
     # Send the filename to the server
-    client_socket.send(filename_to_request.encode())
+    client_socket.send(file_to_request.encode())
 
     # Receive the metadata: filename and file size
     metadata = client_socket.recv(BUFFER_SIZE).decode().split('\n')
@@ -59,5 +55,3 @@ def receive_file():
     # Close the client socket
     client_socket.close()
 
-# Receive the file
-receive_file()

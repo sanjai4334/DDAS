@@ -1,6 +1,6 @@
 import socket
 
-def broadcast_user_id(user_id):
+def get_ip(user_id):
     # UDP socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     
@@ -22,7 +22,5 @@ def broadcast_user_id(user_id):
         print(f"Received IP address {data.decode()} from {addr}")
     except socket.timeout:
         print("No response received. User ID not found on the network.")
-
-# Example usage
-user_id_to_find = input("Enter the user ID you want to find: ")
-broadcast_user_id(user_id_to_find)
+    finally:
+        return data.decode()

@@ -1,6 +1,5 @@
 from pymongo import MongoClient
 import requests
-import mimetypes
 from urllib.parse import urlparse, unquote
 
 # MongoDB connection URL
@@ -61,7 +60,7 @@ def get_user_id():
 
 def check_if_file_exists(collection, file_info):
     """
-    Check if the file already exists in the collection.
+    Check and returns the details if the file already exists in the collection.
     """
     # Check for a document with the same URL, filename, ETag, and content length
     existing_file = collection.find_one({
@@ -73,13 +72,13 @@ def check_if_file_exists(collection, file_info):
 
     if existing_file:
         print("Alert: This file is already present in the database.")
-        return True  # File exists
+        return existing_file  # File exists
     else:
-        print("This is a new file. Proceeding with the save.")
-        return False  # File does not exist
+        print("This is a new file. You can download it from the link.")
+        return None  # File does not exist
 
 
-if __name__ == "__main__":
+def find_data():
     # Example URL
     url = input("Enter the URL of the file: ")
 
@@ -96,6 +95,8 @@ if __name__ == "__main__":
             # Step 2: Create a MongoDB client
             client = MongoClient(db_url)
 
+            retrived_data = None
+
             try:
                 # Step 3: Connect to the database
                 db = client.get_database('DDAS')
@@ -104,7 +105,9 @@ if __name__ == "__main__":
                 file_metadata_collection = db['FileMetadata']
 
                 # Step 5: Check if file already exists
-                if not check_if_file_exists(file_metadata_collection, file_info):
+                retrived_data = check_if_file_exists(file_metadata_collection, file_info)
+                
+                if not retrived_data:
                     # Step 6: Add the user ID to the file info and save it to the database
                     file_info['user_id'] = user_id
                     result = file_metadata_collection.insert_one(file_info)
@@ -116,3 +119,5 @@ if __name__ == "__main__":
             finally:
                 # Close the connection
                 client.close()
+
+                return retrived_data
