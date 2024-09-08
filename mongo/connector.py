@@ -74,7 +74,7 @@ def check_if_file_exists(collection, file_info):
         print("Alert: This file is already present in the database.")
         return existing_file  # File exists
     else:
-        print("This is a new file. You can download it from the link.")
+        print("This is a new file. Downloading it from the link.")
         return None  # File does not exist
 
 
