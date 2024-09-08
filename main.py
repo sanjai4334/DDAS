@@ -4,7 +4,7 @@ from file_transfer import receiver as file_receiver
 
 
 # Gets the file URL and returns the uid if it is found in db
-retrived_data = connector.find_data()
+retrived_data = connector.find_data(input("Enter the URL of the file: "))
 
 if retrived_data:
     ip_found = ip_finder.get_ip(retrived_data["user_id"])

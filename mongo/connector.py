@@ -78,9 +78,7 @@ def check_if_file_exists(collection, file_info):
         return None  # File does not exist
 
 
-def find_data():
-    # Example URL
-    url = input("Enter the URL of the file: ")
+def find_data(url):
 
     # Get file information
     file_info = get_file_info(url)
