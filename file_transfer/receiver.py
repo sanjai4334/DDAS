@@ -67,3 +67,5 @@ def receive_file(ip_addr, file_to_request):
     client_socket.close()
     print("[*] Connection closed.")
 
+if __name__ == "__main__":
+    receive_file(input("Ip Addr:"), input("Enter File Name:"))
