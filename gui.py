@@ -65,8 +65,6 @@ def update_download_history(entry):
     separator = ctk.CTkFrame(scrollable_frame, height=2, fg_color="#CCCCCC")  # A thin gray line
     separator.grid(row=len(scrollable_frame.grid_slaves()), column=0, padx=5, pady=10, sticky='ew')
 
-
-
 # Function to update progress bar
 def update_progress(progress_var, value):
     progress_var.set(value)
@@ -146,7 +144,7 @@ def download_process(progress_var):
 def download_file():
     # Start download process in a new thread to prevent freezing
     progress_var.set(0)
-    progress_bar.grid(row=2, column=0, pady=20, sticky='ew')
+    progress_bar.grid(row=3, column=0, pady=20, sticky='ew')
     download_thread = threading.Thread(target=download_process, args=(progress_var,))
     download_thread.start()
 
@@ -160,10 +158,16 @@ def load_download_history():
     except FileNotFoundError:
         pass
 
+def load_user_id():
+    try:
+        with open("user_id.txt", "r") as file:
+            return file.read().strip()
+    except FileNotFoundError:
+        return "User ID not found"
 
 # Initialize the main window
 app = ctk.CTk()
-app.geometry("650x650")
+app.geometry("650x700")
 app.resizable(False, False)
 app.title("DDAS Application")
 
@@ -197,23 +201,28 @@ tabview.grid(row=1, column=0, pady=10, padx=10, sticky='nsew')
 tabview.add("Download")
 tabview.add("History")
 
+# User ID display
+user_id = load_user_id()
+user_id_label = ctk.CTkLabel(tabview.tab("Download"), text=f"User ID: {user_id}", font=("Helvetica", 16))
+user_id_label.grid(row=0, column=0, padx=20, pady=10, sticky='ew')
+
 # URL input section with placeholder
 url_input = ctk.CTkEntry(tabview.tab("Download"), placeholder_text="Enter the URL", font=("Helvetica", 16), width=500)
-url_input.grid(row=0, column=0, padx=20, pady=10, sticky='ew')
+url_input.grid(row=1, column=0, padx=20, pady=10, sticky='ew')
 
 # Download button
 download_button = ctk.CTkButton(tabview.tab("Download"), text="Start Download", command=download_file, font=("Helvetica", 16), width=200, height=40)
-download_button.grid(row=1, column=0, pady=15)
+download_button.grid(row=2, column=0, pady=15)
 
 # Progress bar for showing download progress
 progress_var = ctk.DoubleVar()
 progress_bar = ctk.CTkProgressBar(tabview.tab("Download"), variable=progress_var, width=500, height=20)
-progress_bar.grid(row=2, column=0, pady=15, sticky='ew')
+progress_bar.grid(row=3, column=0, pady=15, sticky='ew')
 progress_bar.grid_remove()  # Hide progress bar initially
 
 # Frame for Debug Info and message box
 debug_frame = ctk.CTkFrame(tabview.tab("Download"))
-debug_frame.grid(row=3, column=0, padx=20, pady=15, sticky='nsew')
+debug_frame.grid(row=4, column=0, padx=20, pady=15, sticky='nsew')
 
 # "Debug Info" label
 debug_label = ctk.CTkLabel(debug_frame, text="Debug Info:", font=("Helvetica", 16, "bold"))
