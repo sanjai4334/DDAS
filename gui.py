@@ -8,6 +8,7 @@ from file_downloader import downloader
 import threading
 import json
 from datetime import datetime
+from PIL import Image, ImageTk, ImageFilter
 
 # Function to redirect print statements to the message box
 class TextRedirector:
@@ -70,6 +71,35 @@ def update_progress(progress_var, value):
     progress_var.set(value)
     app.update_idletasks()
 
+
+def choose_transfer_method():
+    choice = ctk.StringVar()
+
+    # Create a semi-transparent overlay
+    overlay = ctk.CTkFrame(app, fg_color="gray10")
+    overlay.place(relx=0, rely=0, relwidth=1, relheight=1)
+
+    # Create the alert frame with a border
+    alert_frame = ctk.CTkFrame(app, corner_radius=10, border_width=2, border_color="gray")
+    alert_frame.place(relx=0.5, rely=0.5, anchor="center")
+
+    label = ctk.CTkLabel(alert_frame, text="This file exists in the database.\nHow would you like to download it?", font=("Helvetica", 16))
+    label.pack(pady=20, padx=20)
+
+    def on_choice(method):
+        choice.set(method)
+        alert_frame.destroy()
+        overlay.destroy()
+
+    receive_button = ctk.CTkButton(alert_frame, text="Receive from Another Device", command=lambda: on_choice("Received from Other Device"))
+    receive_button.pack(pady=10)
+
+    direct_button = ctk.CTkButton(alert_frame, text="Direct URL Download", command=lambda: on_choice("Direct URL Download"))
+    direct_button.pack(pady=10)
+
+    app.wait_window(alert_frame)
+    return choice.get()
+
 # Function placeholder for the download process
 def download_process(progress_var):
     entry = {
@@ -98,23 +128,31 @@ def download_process(progress_var):
 
             # Step 1: Check if file URL exists in the database
             update_progress(progress_var, 0.2)
-            retrived_data = connector.find_data(file_url)
+            retrieved_data = connector.find_data(file_url)
 
-            if retrived_data:
-                entry["filename"] = retrived_data["filename"]
-                entry["method"] = "Received from Other Device"
+            if retrieved_data:
+                entry["filename"] = retrieved_data["filename"]
                 
-                update_progress(progress_var, 0.5)
-                ip_found = ip_finder.get_ip(retrived_data["user_id"])
+                chosen_method = choose_transfer_method()
+                entry["method"] = chosen_method
 
-                if ip_found:
-                    update_progress(progress_var, 0.8)
-                    file_receiver.receive_file(ip_found, retrived_data["filename"])
-                    entry["status"] = "Completed"
-                    update_progress(progress_var, 1.0)
+                if chosen_method == "Received from Other Device":
+                    update_progress(progress_var, 0.5)
+                    ip_found = ip_finder.get_ip(retrieved_data["user_id"])
+
+                    if ip_found:
+                        update_progress(progress_var, 0.8)
+                        file_receiver.receive_file(ip_found, retrieved_data["filename"])
+                        entry["status"] = "Completed"
+                        update_progress(progress_var, 1.0)
+                    else:
+                        print(f"No IP address found for user_id: {retrieved_data['user_id']}")
+                        entry["status"] = "Failed"
                 else:
-                    print(f"No IP address found for user_id: {retrived_data['user_id']}")
-                    entry["status"] = "Failed"
+                    downloader.download(file_url)
+                    update_progress(progress_var, 1.0)
+                    print("File Downloaded from the server successfully!")
+                    entry["status"] = "Completed"
             else:
                 downloader.download(file_url)
                 entry["filename"] = file_url.split('/')[-1]
