@@ -248,6 +248,10 @@ user_id_label.grid(row=0, column=0, padx=20, pady=10, sticky='ew')
 url_input = ctk.CTkEntry(tabview.tab("Download"), placeholder_text="Enter the URL", font=("Helvetica", 16), width=500)
 url_input.grid(row=1, column=0, padx=20, pady=10, sticky='ew')
 
+# setting the default value for the url_input through the command line argument
+if len(sys.argv) > 1:
+    url_input.insert(0, sys.argv[1])
+
 # Download button
 download_button = ctk.CTkButton(tabview.tab("Download"), text="Start Download", command=download_file, font=("Helvetica", 16), width=200, height=40)
 download_button.grid(row=2, column=0, pady=15)
