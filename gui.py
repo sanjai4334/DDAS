@@ -82,8 +82,12 @@ def choose_transfer_method():
     alert_frame = ctk.CTkFrame(app, corner_radius=10, border_width=2, border_color="gray")
     alert_frame.place(relx=0.5, rely=0.5, anchor="center")
 
+    # Add danger symbol
+    danger_symbol = ctk.CTkLabel(alert_frame, text="⚠", font=("Helvetica", 48), text_color="red")
+    danger_symbol.pack(pady=(20, 10))
+
     label = ctk.CTkLabel(alert_frame, text="This file exists in the database.\nHow would you like to download it?", font=("Helvetica", 16))
-    label.pack(pady=20, padx=20)
+    label.pack(pady=(0, 20), padx=20)
 
     def on_choice(method):
         choice.set(method)
